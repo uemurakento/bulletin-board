@@ -15,6 +15,15 @@ public class Comment {
 	private String content;
 	/** コメントの記事id*/
 	private Integer articleId;
+	
+	public Comment() {}
+	public Comment(Integer id, String name, String content, Integer articleId) {
+		this.id = id;
+		this.name = name;
+		this.content = content;
+		this.articleId = articleId;
+	}
+
 
 	public Integer getId() {
 		return id;
