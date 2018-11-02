@@ -16,6 +16,12 @@ import jp.co.rakus.form.CommentForm;
 import jp.co.rakus.repository.ArticleRepository;
 import jp.co.rakus.repository.CommentRepository;
 
+/**
+ * 掲示板を表示するコントローラー.
+ * 
+ * @author kento.uemura
+ *
+ */
 @Controller
 @Transactional
 @RequestMapping("/bulletinboard")
@@ -34,6 +40,12 @@ public class ArticleController {
 		return new CommentForm();
 	}
 	
+	/**
+	 * 画面を表示する.
+	 * 
+	 * @param model モデル
+	 * @return 掲示板画面
+	 */
 	@RequestMapping("/")
 	public String index(Model model) {
 		List<Article> articles = articleRepository.findAll();
@@ -44,17 +56,45 @@ public class ArticleController {
 		return "bulletinboard";
 	}
 	
+	/**
+	 * 記事を追加をする.
+	 * 
+	 * @param model モデル
+	 * @param form 入力された記事情報.
+	 * @return indexにフォワード
+	 */
 	@RequestMapping("/insertarticle")
 	public String insertArticle(Model model,ArticleForm form) {
 		Article article = new Article(null,form.getName(),form.getContent(),null);
 		articleRepository.insert(article);
-		return index(model);
+		return "forward:/bulletinboard/";
 	}
 	
+	/**
+	 * コメントを追加する.
+	 * 
+	 * @param model モデル
+	 * @param form 入力されたコメント情報
+	 * @return indexにフォワード
+	 */
 	@RequestMapping("/insertcomment")
 	public String insertComment(Model model,CommentForm form) {
 		Comment comment = new Comment(null,form.getName(),form.getContent(),Integer.valueOf(form.getArticleId()));
 		commentRepository.insert(comment);
+		return "forward:/bulletinboard/";
+	}
+	
+	/**
+	 * 記事とコメントを削除する.
+	 * 
+	 * @param model モデル
+	 * @param articleId 削除する記事番号
+	 * @return indexメソッド
+	 */
+	@RequestMapping("/deletearticle")
+	public String deleteArticle(Model model,Integer articleId) {
+		commentRepository.deleteByArticleId(articleId);
+		articleRepository.deleteById(articleId);
 		return index(model);
 	}
 }

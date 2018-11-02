@@ -26,12 +26,16 @@ public class ArticleRepository {
 	@Autowired
 	public NamedParameterJdbcTemplate template;
 	private static final RowMapper<Article> ARTICLE_ROWMAPPER = (rs,i) ->{
-		//ここにコメントの値を入れる
 		List<Comment> comments = new ArrayList<>();
 		Article article = new Article(rs.getInt("id"),rs.getString("name"),rs.getString("content"),comments);
 		return article;
 	};
 	
+	/**
+	 * 記事の全件検索.
+	 * 
+	 * @return
+	 */
 	public List<Article> findAll(){
 		String sql = "SELECT id,name,content FROM "+TABLE_NAME+" ORDER BY id DESC;";
 		SqlParameterSource param = new MapSqlParameterSource();
@@ -39,13 +43,25 @@ public class ArticleRepository {
 		return articles;
 	}
 
+	/**
+	 * 記事の追加.
+	 * 
+	 * @param article 追加する記事情報を持ったドメイン
+	 */
 	public void insert(Article article) {
 		String sql = "INSERT INTO articles (name,content) values (:name,:content);";
 		SqlParameterSource param = new BeanPropertySqlParameterSource(article);
 		template.update(sql, param);
 	}
 	
+	/**
+	 * 記事の削除.
+	 * 
+	 * @param id 削除する記事番号
+	 */
 	public void deleteById(int id) {
-		
+		String sql = "DELETE FROM "+TABLE_NAME+" WHERE id=:id";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("id", id);
+		template.update(sql, param);
 	}
 }
