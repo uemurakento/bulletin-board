@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import jp.co.rakus.domain.Article;
+import jp.co.rakus.domain.Comment;
 import jp.co.rakus.form.ArticleForm;
+import jp.co.rakus.form.CommentForm;
 import jp.co.rakus.repository.ArticleRepository;
 import jp.co.rakus.repository.CommentRepository;
 
@@ -24,8 +26,12 @@ public class ArticleController {
 	private CommentRepository commentRepository;
 	
 	@ModelAttribute
-	public ArticleForm setUpForm() {
+	public ArticleForm setUpArticleForm() {
 		return new ArticleForm();
+	}
+	@ModelAttribute
+	public CommentForm setUpCommentForm() {
+		return new CommentForm();
 	}
 	
 	@RequestMapping("/")
@@ -38,7 +44,17 @@ public class ArticleController {
 		return "bulletinboard";
 	}
 	
-	public String insertArticle(Model model) {
+	@RequestMapping("/insertarticle")
+	public String insertArticle(Model model,ArticleForm form) {
+		Article article = new Article(null,form.getName(),form.getContent(),null);
+		articleRepository.insert(article);
+		return index(model);
+	}
+	
+	@RequestMapping("/insertcomment")
+	public String insertComment(Model model,CommentForm form) {
+		Comment comment = new Comment(null,form.getName(),form.getContent(),Integer.valueOf(form.getArticleId()));
+		commentRepository.insert(comment);
 		return index(model);
 	}
 }
