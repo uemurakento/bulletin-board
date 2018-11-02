@@ -12,7 +12,9 @@
 
 <%--記事投稿フォーム --%>
 <form:form modelAttribute="articleForm" action="${pageContext.request.contextPath}/bulletinboard/insertarticle">
+<form:errors path="name" cssStyle="color:red" element="div"/>
 投稿者名:<form:input path="name"/><br>
+<form:errors path="content" cssStyle="color:red" element="div"/>
 投稿内容：<form:textarea path="content"/><br>
 <input type="submit" value="記事投稿">
 </form:form><hr>
@@ -37,8 +39,10 @@
 </c:forEach>
 
 <%--ここにコメント投稿フォーム --%>
-<form:form modelAttribute="commentForm" action="${pageContext.request.contextPath}/bulletinboard/insertcomment" id="${article.id}">
+<form:form modelAttribute="commentForm" action="${pageContext.request.contextPath}/bulletinboard/insertcomment">
+<form:errors path="name" cssStyle="color:red" element="div"/>
 名前:<form:input path="name"/><br>
+<form:errors path="content" cssStyle="color:red" element="div"/>
 コメント：<form:textarea path="content"/>
 <input type="hidden" name="articleId" value="${article.id}"><br>
 <input type="submit" value="コメント投稿">

@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -48,10 +50,11 @@ public class ArticleController {
 	 */
 	@RequestMapping("/")
 	public String index(Model model) {
-		List<Article> articles = articleRepository.findAll();
-		for(Article article:articles) {
-			article.setCommentList(commentRepository.findByArticleId(article.getId()));
-		}
+//		List<Article> articles = articleRepository.findAll();
+//		for(Article article:articles) {
+//			article.setCommentList(commentRepository.findByArticleId(article.getId()));
+//		}
+		List<Article> articles = articleRepository.findAllAtOnceSql();
 		model.addAttribute("articles", articles);
 		return "bulletinboard";
 	}
@@ -61,13 +64,17 @@ public class ArticleController {
 	 * 
 	 * @param model モデル
 	 * @param form 入力された記事情報.
+	 * @param result エラーメッセージを格納
 	 * @return indexにフォワード
 	 */
 	@RequestMapping("/insertarticle")
-	public String insertArticle(Model model,ArticleForm form) {
+	public String insertArticle(Model model,@Validated ArticleForm form,BindingResult result) {
+		if(result.hasErrors()) {
+			return index(model);
+		}
 		Article article = new Article(null,form.getName(),form.getContent(),null);
 		articleRepository.insert(article);
-		return "forward:/bulletinboard/";
+		return "redirect:/bulletinboard/";
 	}
 	
 	/**
@@ -75,13 +82,17 @@ public class ArticleController {
 	 * 
 	 * @param model モデル
 	 * @param form 入力されたコメント情報
+	 * @param result エラーメッセージを格納
 	 * @return indexにフォワード
 	 */
 	@RequestMapping("/insertcomment")
-	public String insertComment(Model model,CommentForm form) {
+	public String insertComment(Model model,@Validated CommentForm form,BindingResult result) {
+		if(result.hasErrors()) {
+			return index(model);
+		}
 		Comment comment = new Comment(null,form.getName(),form.getContent(),Integer.valueOf(form.getArticleId()));
 		commentRepository.insert(comment);
-		return "forward:/bulletinboard/";
+		return "redirect:/bulletinboard/";
 	}
 	
 	/**
