@@ -40,9 +40,14 @@
 
 <%--ここにコメント投稿フォーム --%>
 <form:form modelAttribute="commentForm" action="${pageContext.request.contextPath}/bulletinboard/insertcomment">
+<%--エラーチェックは今の記事idと入力フォームに入力された記事idを使って条件分岐する --%>
+<c:if test="${article.id == commentForm.articleId}">
 <form:errors path="name" cssStyle="color:red" element="div"/>
+</c:if>
 名前:<form:input path="name"/><br>
+<c:if test="${article.id == commentForm.articleId}">
 <form:errors path="content" cssStyle="color:red" element="div"/>
+</c:if>
 コメント：<form:textarea path="content"/>
 <input type="hidden" name="articleId" value="${article.id}"><br>
 <input type="submit" value="コメント投稿">

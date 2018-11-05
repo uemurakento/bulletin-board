@@ -45,10 +45,10 @@ public class ArticleRepository {
 				comments = article.getCommentList();
 				articles.add(article);
 			}
-			
+			if(rs.getInt("comment_id") != 0) {
 			Comment comment = new Comment(rs.getInt("comment_id"), rs.getString("comment_name"),rs.getString("comment_content"), articleId);
 			comments.add(comment);
-			
+			}
 			previousId = articleId;
 			
 		}
@@ -91,6 +91,13 @@ public class ArticleRepository {
 		template.update(sql, param);
 	}
 
+	public void deleteByIdOnceSql(int id) {
+		String sql = "with deleted as(delete from "+CommentRepository.TABLE_NAME+" where article_id=:id) delete from "+TABLE_NAME+" where id=:id;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("id", id);
+		template.update(sql, param);
+	}
+
+	
 	/**
 	 * 記事、コメントの全件検索を一括で行う.
 	 * 
