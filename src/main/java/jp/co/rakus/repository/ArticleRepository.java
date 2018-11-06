@@ -26,31 +26,50 @@ public class ArticleRepository {
 	private static final String TABLE_NAME = "articles";
 	@Autowired
 	public NamedParameterJdbcTemplate template;
+	
 	private static final RowMapper<Article> ARTICLE_ROWMAPPER = (rs, i) -> {
 		List<Comment> comments = new ArrayList<>();
-		Article article = new Article(rs.getInt("id"), rs.getString("name"), rs.getString("content"), comments);
+		Article article = new Article(
+				rs.getInt("id"), 
+				rs.getString("name"),
+				rs.getString("content"),
+				comments);
+		
 		return article;
 	};
+	
 	private static final ResultSetExtractor<List<Article>> RESULT_SET_EXTRACTOR = (rs) -> {
 		List<Article> articles = new ArrayList<>();
 		Integer previousId = 0;
 		List<Comment> comments = null;
 		Article article = null;
-		
+
 		while (rs.next()) {
 			Integer articleId = rs.getInt("article_id");
-			
-			if(previousId != articleId) {
-				article = new Article(articleId,rs.getString("article_name"),rs.getString("article_content"),new ArrayList<>());
+
+			if (previousId != articleId) {
+				article = new Article(
+						articleId,
+						rs.getString("article_name"),
+						rs.getString("article_content"),
+						new ArrayList<>());
+				
 				comments = article.getCommentList();
 				articles.add(article);
 			}
-			if(rs.getInt("comment_id") != 0) {
-			Comment comment = new Comment(rs.getInt("comment_id"), rs.getString("comment_name"),rs.getString("comment_content"), articleId);
-			comments.add(comment);
-			}
-			previousId = articleId;
 			
+			if (rs.getInt("comment_id") != 0) {
+				Comment comment = new Comment(
+						rs.getInt("comment_id"),
+						rs.getString("comment_name"),
+						rs.getString("comment_content"),
+						articleId);
+				
+				comments.add(comment);
+			}
+			
+			previousId = articleId;
+
 		}
 		return articles;
 	};
@@ -91,13 +110,19 @@ public class ArticleRepository {
 		template.update(sql, param);
 	}
 
+	/**
+	 * SQL文一回で記事とコメントを削除する.
+	 * 
+	 * @param id
+	 *            削除する記事番号
+	 */
 	public void deleteByIdOnceSql(int id) {
-		String sql = "with deleted as(delete from "+CommentRepository.TABLE_NAME+" where article_id=:id) delete from "+TABLE_NAME+" where id=:id;";
+		String sql = "WITH deleted AS (DELETE FROM " + CommentRepository.TABLE_NAME
+				+ " WHERE article_id=:id) delete from " + TABLE_NAME + " where id=:id;";
 		SqlParameterSource param = new MapSqlParameterSource().addValue("id", id);
 		template.update(sql, param);
 	}
 
-	
 	/**
 	 * 記事、コメントの全件検索を一括で行う.
 	 * 
@@ -105,7 +130,8 @@ public class ArticleRepository {
 	 */
 	public List<Article> findAllAtOnceSql() {
 		String sql = "SELECT a.id article_id,a.name article_name,a.content article_content,c.id comment_id,c.name comment_name,c.content comment_content FROM "
-				+ TABLE_NAME + " a LEFT OUTER JOIN " + CommentRepository.TABLE_NAME + " c ON a.id = c.article_id ORDER BY a.id DESC ,c.id DESC;";
+				+ TABLE_NAME + " a LEFT OUTER JOIN " + CommentRepository.TABLE_NAME
+				+ " c ON a.id = c.article_id ORDER BY a.id DESC ,c.id DESC;";
 
 		List<Article> articles = template.query(sql, RESULT_SET_EXTRACTOR);
 		// List<Article> articles = template.query(sql,new
